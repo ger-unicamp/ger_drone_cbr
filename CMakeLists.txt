@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   std_srvs
+  message_generation
+
   ##ardrone_autonomy
 )
 
@@ -37,6 +39,8 @@ generate_messages(
    std_msgs
  )
 
+
+
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -52,16 +56,15 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES droneGER
-#  CATKIN_DEPENDS roscpp rospy sensor_msgs std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES droneGER
+  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs
+  DEPENDS system_lib
 )
 
 ###########
 ## Build ##
 ###########
-
 
 add_executable(estrategia src/estrategia)
 target_link_libraries(estrategia ${catkin_LIBRARIES})
