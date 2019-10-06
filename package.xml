@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ger_drone_cbr</name>
+  <version>0.0.0</version>
+  <description>The drone_ger package</description>
+
+  <!-- Mantedores -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="ger_unicamp@googlegroups.com">Grupo de Estudos em Robotica - GER - Unicamp</maintainer>
+  <maintainer email="ger_drone@googlegroups.com">Equipe Drone - GER - Unicamp</maintainer>
+
+  <!-- Licenca -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+
+  <!-- Enderecos-->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <url type="website">http://www.gerunicamp.com.br/</url>
+
+
+  <!-- Autores -->
+  <!-- Authors do not have to be maintainers, but could be -->
+  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+  <author email="eltsu3110@hotmail.com">Elton Cardoso do Nascimento</author>
+  <author email="lhwanphilippesilva@gmail.com">Lhwan Philippe Silva</author>
+  <author email="leonardo-rener@hotmail.com">Leonardo Rener</author>
+  <author email="paiano.otavio@gmail.com">Otavio Paiano</author>
+
+  <!-- Dependencias -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

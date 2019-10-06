@@ -1,0 +1,16 @@
+<launch>
+   <arg name="droneip" default="192.168.1.1" />	
+   <node pkg="ardrone_autonomy" type="ardrone_driver" name="ardrone_driver" args="-ip $(arg droneip)"/>
+
+   <group ns="CBR">
+	<node pkg="ger_drone_cbr" type="estrategia" name="estrategia" output="screen" >
+        	<remap from="/qr_codes" to="/processaVideo/qr_codes" />
+	</node>
+   </group>   
+
+   <group ns="processaVideo">
+	<node pkg="nodelet" type="nodelet" name="detectaQR" args="standalone qr_detector/qr_detector_nodelet">
+		<remap from="image" to="/ardrone/image_raw" />
+	</node>
+   </group>
+</launch>	
