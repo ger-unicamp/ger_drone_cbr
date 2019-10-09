@@ -56,8 +56,8 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES droneGER
+  #INCLUDE_DIRS include
+  LIBRARIES ger_drone_cbr
   CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs
   DEPENDS system_lib
 )
@@ -78,6 +78,11 @@ target_link_libraries(rota ${catkin_LIBRARIES})
 add_executable(interface src/interface)
 target_link_libraries(interface ${catkin_LIBRARIES})
 
+
+add_dependencies(estrategia ${catkin_EXPORTED_TARGETS})
+add_dependencies(controleARDrone ${catkin_EXPORTED_TARGETS})
+add_dependencies(rota ${catkin_EXPORTED_TARGETS})
+add_dependencies(interface ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
