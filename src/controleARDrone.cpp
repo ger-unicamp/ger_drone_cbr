@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "controle");
 
-	ControleARDrone controle("controle", 100);
+	ControleARDrone controle("controle", 10);
 
 	controle.setTopicoExterno();
 	controle.setTopicoInterno();
@@ -20,8 +20,8 @@ int main(int argc, char **argv)
 ControleARDrone::ControleARDrone(std::string nome, int frequencia) :no(nome), loop_rate(frequencia)
 {
 	this->frequencia = frequencia;
-	servicoCamera = no.serviceClient<std_srvs::Empty>("/ardrone/setcamchannel");
-	cameraAtual = 0;
+	servicoCamera = no.serviceClient<ardrone_autonomy::CamSelect>("/ardrone/setcamchannel");//(no.resolveName("ardrone/setcamchannel"),1);
+	this->cameraAtual = 0;
 };
 
 void ControleARDrone::moveDrone(const ger_drone_cbr::Position::ConstPtr& posicao)
@@ -32,33 +32,33 @@ void ControleARDrone::moveDrone(const ger_drone_cbr::Position::ConstPtr& posicao
 void ControleARDrone::mudaCamera()
 {
 	ardrone_autonomy::CamSelect canal;
-	switch (cameraAtual)
+	switch (this->cameraAtual)
 	{
 		case 0:
 			
 
 			canal.request.channel = 0;
 
-			servicoCamera.call(canal);
+			this->servicoCamera.call(canal);
 
-			cameraAtual += 1;
+			this->cameraAtual += 1;
 		break;
 
 		case 1:
-			cameraAtual += 1;
+
+			this->cameraAtual += 1;
 		break;
 
 		case 2:
 
 			canal.request.channel = 1;
 
-			servicoCamera.call(canal);
+			this->servicoCamera.call(canal);
 
-			cameraAtual += 1;
-
-			cameraAtual = 0;
+			this->cameraAtual = 0;
 		break;
 	}
+
 }
 
 void ControleARDrone::setTopicoExterno()

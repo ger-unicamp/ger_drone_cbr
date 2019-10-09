@@ -1,3 +1,5 @@
+#include "estrategia.h"
+
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include <sstream>
@@ -31,7 +33,7 @@ int main(int argc, char **argv)
 	{
 		std::stringstream ss;
 
-		ss << "c autoInit 500 800 4000 0.5";
+		//ss << "c autoInit 500 800 4000 0.5";
 		
 		/*switch (caso)
 		{
