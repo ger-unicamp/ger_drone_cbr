@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle no;
 
 	ros::Rate loop_rate(1);
-
+		
 	ros::Subscriber qr = no.subscribe("/qr_codes", 1000, detectouQR);
 
 	ros::Publisher comando_drone = no.advertise<std_msgs::String>("/tum_ardrone/com", 1000);

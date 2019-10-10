@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 
   ##ardrone_autonomy
+  tum_ardrone
 )
 
 

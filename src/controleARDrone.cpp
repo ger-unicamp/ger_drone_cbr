@@ -2,6 +2,10 @@
 #include "ros/ros.h"
 #include <std_srvs/Empty.h>
 #include <ardrone_autonomy/CamSelect.h>
+#include <tum_ardrone/filter_state.h>
+#include "ger_drone_cbr/Position.h"
+#include <string.h>
+#include "std_msgs/String.h"
 
 int main(int argc, char **argv)
 {
@@ -24,55 +28,89 @@ ControleARDrone::ControleARDrone(std::string nome, int frequencia) :no(nome), lo
 	this->cameraAtual = 0;
 };
 
-void ControleARDrone::moveDrone(const ger_drone_cbr::Position::ConstPtr& posicao)
+void ControleARDrone::moveDrone(const ger_drone_cbr::Position& posicao)
 {
+	std::stringstream ss;
 
+	ss << "goto" << posicao.x << " " << posicao.y < " " << posicao.z << " " << posicao.yaw;
+	
+	std_msgs::String comando;
+	comando.data = ss.str();
+	comandoDrone.publish(comando);
 }
 
-void ControleARDrone::mudaCamera()
+void ControleARDrone::sobe()
 {
-	ardrone_autonomy::CamSelect canal;
-	switch (this->cameraAtual)
+	for(int i = 0; i<14; i++)
 	{
-		case 0:
-			
+		std::stringstream ss;
 
-			canal.request.channel = 0;
+		switch (i)
+		{
 
-			this->servicoCamera.call(canal);
+			case 0:
+				ss << "c autoInit 500 800 4000 0.5";
+			break;
 
-			this->cameraAtual += 1;
-		break;
+			case 2:
+				ss << "c setReference $POSE$";
+			break;
 
-		case 1:
+			case 4:
+				ss << "c setInitialReachDist 0.2";
+			break;
 
-			this->cameraAtual += 1;
-		break;
+			case 6:
+				ss << "c setStayWithinDist 0.3";
+			break;
 
-		case 2:
+			case 8:
+				ss << "c setStayTime 3";
+			break;
 
-			canal.request.channel = 1;
+			case 10:
+				ss << "c lockScaleFP";
+			break;
 
-			this->servicoCamera.call(canal);
+			case 12:
+				ss << "c goto 0 0 0 0";
+			break;
+			case 14:
+				ss << "c goto 0.5 0.5 0.5 0";
+			break;
+		}
+		std_msgs::String comando;
+		comando.data = ss.str();
+		comandoDrone.publish(comando);
 
-			this->cameraAtual = 0;
-		break;
+		ros::spinOnce();
+		loop_rate.sleep();
 	}
 
 }
 
+void ControleARDrone::mudaCamera(int camera)
+{
+	ardrone_autonomy::CamSelect canal;
+	
+	canal.request.channel = camera;
+
+	servicoCamera.call(canal);
+}
+
 void ControleARDrone::setTopicoExterno()
 {
-	comando = no.advertise<std_msgs::String>("/tum_ardrone/com", 1000);
+	comandoDrone = no.advertise<std_msgs::String>("/tum_ardrone/com", 1000);
+
+	getPosicao = no.subscribe("/ardrone/predictedPose", 1000, &ControleARDrone::getLocalizacao, this);
 }
 
 void ControleARDrone::loop()
-{
-	
+{	
 
 	while (ros::ok())
 	{
-		mudaCamera();
+		
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
@@ -80,9 +118,49 @@ void ControleARDrone::loop()
 
 void ControleARDrone::setTopicoInterno()
 {
-	position = no.subscribe("/ir_para", 1000, &ControleARDrone::moveDrone, this);
+	destino = no.subscribe("/ir_para", 1000, &ControleARDrone::moveDrone, this);
+	comandoInterno = no.subscribe("/comando", 1000, &ControleARDrone::enviaComando, this);
+
+	setPosicao = no.advertise<ger_drone_cbr::Position>("/posicao", 1000);
 }
 
-//Controle::Controle()
-//{
-//}
+void ControleARDrone::enviaComando(const std_msgs::String comando)
+{
+	if (strcmp(comando.data.c_str(), "subir") == 0)
+	{
+		sobe();
+	}
+	else if (strcmp(comando.data.c_str(), "pousar") == 0)
+	{
+		pousa();
+	}
+	else if (strcmp(comando.data.c_str(), "ledVermelho") == 0)
+	{
+		
+	}
+}
+
+void ControleARDrone::pousa()
+{
+
+	std::stringstream ss;
+
+	ss << "c land";
+
+	std_msgs::String comando;
+	comando.data = ss.str();
+	comandoDrone.publish(comando);
+}
+
+void ControleARDrone::getLocalizacao(const tum_ardrone::filter_state posicao)
+{
+	ger_drone_cbr::Position posicaoConvertida;
+
+	posicaoConvertida.x = posicao.x;
+	posicaoConvertida.y = posicao.y;
+	posicaoConvertida.z = posicao.z;
+	posicaoConvertida.yaw = posicao.yaw;
+
+
+	setPosicao.publish(posicaoConvertida);
+}
