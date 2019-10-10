@@ -150,9 +150,14 @@ void ControleARDrone::pousa()
 	comandoDrone.publish(comando);
 }
 
-void ControleARDrone::getLocalizacao(const tum_ardrone::filter_state posicao)
+void ControleARDrone::getLocalizacao(const tum_ardrone::filter_state& posicao)
 {
 	ger_drone_cbr::Position posicaoConvertida;
+	
+	posicaoConvertida.x = 0;
+	posicaoConvertida.y = 0;
+	posicaoConvertida.yaw = 0;
+	posicaoConvertida.z = 0;
 
 	posicaoConvertida.x = posicao.x;
 	posicaoConvertida.y = posicao.y;
@@ -162,3 +167,4 @@ void ControleARDrone::getLocalizacao(const tum_ardrone::filter_state posicao)
 
 	setPosicao.publish(posicaoConvertida);
 }
+

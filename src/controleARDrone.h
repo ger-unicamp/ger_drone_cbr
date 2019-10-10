@@ -56,7 +56,7 @@ class ControleARDrone
 		void mudaCamera(int camera);
 
 		///<summary> Verifica a localização atual do drone </summary>
-		void getLocalizacao(const tum_ardrone::filter_state posicao);
+		void getLocalizacao(const tum_ardrone::filter_state& posicao);
 
 		///<summary> Envia um comando ao drone </summary>
 		void enviaComando(const std_msgs::String comando);
