@@ -13,9 +13,6 @@ int main(int argc, char **argv)
 
 	ControleARDrone controle("controle", 10);
 
-	controle.setTopicoExterno();
-	controle.setTopicoInterno();
-
 	controle.loop();
 
 	return 0;
@@ -32,7 +29,7 @@ void ControleARDrone::moveDrone(const ger_drone_cbr::Position& posicao)
 {
 	std::stringstream ss;
 
-	ss << "goto" << posicao.x << " " << posicao.y < " " << posicao.z << " " << posicao.yaw;
+	ss << "c goto " << posicao.x << " " << posicao.y << " " << posicao.z << " " << posicao.yaw;
 	
 	std_msgs::String comando;
 	comando.data = ss.str();
@@ -110,7 +107,8 @@ void ControleARDrone::loop()
 
 	while (ros::ok())
 	{
-		
+		setTopicoExterno();
+		setTopicoInterno();
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
