@@ -4,94 +4,150 @@
 #include "std_msgs/String.h"
 #include <sstream>
 #include <std_srvs/Empty.h>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
-void detectouQR(const std_msgs::String::ConstPtr& mensagem)
+#include "ger_drone_cbr/Position.h"
+  
+bool comparaPosicao(ger_drone_cbr::Position a, ger_drone_cbr::Position b)
 {
-	ROS_INFO("Leitura do QR: [%s]", mensagem->data.c_str());
+	if (abs(a.x - b.x) > 0.5 || abs(a.y - b.y) > 0.5 || abs(a.z - b.z) > 0.5 || abs(a.yaw - b.yaw) > 0.5)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
-int main(int argc, char **argv)
+Estrategia::Estrategia(std::string nome, int frequencia) : no(nome), loop_rate(frequencia), tempoDelay(5000)
 {
-	ros::init(argc, argv, "estrategia");
+	
+}
 
-	ros::NodeHandle no;
-
-	ros::Rate loop_rate(1);
-		
-	ros::Subscriber qr = no.subscribe("/qr_codes", 1000, detectouQR);
-
-	ros::Publisher comando_drone = no.advertise<std_msgs::String>("/tum_ardrone/com", 1000);
-
-	//ros::ServiceClient mudaCamera = no.serviceClient<std_srvs::Empty>("/ardrone/togglecam");
-	std_srvs::Empty vazio;
-
-	std_msgs::String comando; //Armazena a mensagem
-
-	int caso = 0;
-
+void Estrategia::loop()
+{
 	while (ros::ok())
 	{
-		std::stringstream ss;
-
-		//ss << "c autoInit 500 800 4000 0.5";
-		
-		/*switch (caso)
-		{
-			case -1:
-		//		mudaCamera.call(vazio);
-				//ss <<"takeoff"
-			break;
-
-			case 0:
-				ss << "c autoInit 500 800 4000 0.5";
-			break;
-
-			case 2:
-				ss << "c setReference $POSE$";
-			break;
-
-			case 4:
-				ss << "c setInitialReachDist 0.2";
-			break;
-
-			case 6:
-				ss << "c setStayWithinDist 0.3";
-			break;
-
-			case 8:
-				ss << "c setStayTime 3";
-			break;
-
-			case 10:
-				ss << "c lockScaleFP";
-			break;
-
-			case 12:
-				ss << "c goto 0 0 0 0";
-			break;
-			case 14:
-				ss << "c goto 0.5 0.5 0.5 0";
-				break;
-		}
-
-		if (caso <= 15 && caso%2 == 0)
-		{
-			
-
-				
-			comando.data = ss.str();
-			comando_drone.publish(comando);
-
-			ROS_INFO("Enviei: [%s]", comando.data.c_str());
-		}
-		caso += 1;*/
-		
-
-		comando.data = ss.str();
-		comando_drone.publish(comando);
 		ros::spinOnce();
-		loop_rate.sleep();
+		this->loop_rate.sleep();
 	}
+}
 
-	return 0;
+void Estrategia::fase1()
+{
+	std_msgs::String comando;
+
+	std::stringstream ss;
+
+	ss << "subir";
+
+	comando.data = ss.str();
+	enviaComando.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();
+
+	delay();
+
+	trajetoria = (ger_drone_cbr::Position*) malloc(8 * sizeof(ger_drone_cbr::Position));
+
+	for (int i = 0; i < 8; i++)
+	{
+		irPara(trajetoria[i]);
+
+		while (comparaPosicao(trajetoria[i], this->posicao) == false)
+		{
+			if (base == true)
+			{
+				ss.str("para");
+
+				comando.data = ss.str();
+				enviaComando.publish(comando);
+
+				ros::spinOnce();
+				loop_rate.sleep();
+
+				ger_drone_cbr::Position parouEm = this->posicao;
+
+				//centraliza base
+
+				ss.str("pousar");
+
+				comando.data = ss.str();
+				enviaComando.publish(comando);
+
+				ros::spinOnce();
+				loop_rate.sleep();
+
+				//while(voando == true)
+
+				ss.str("subir");
+
+				irPara(parouEm);
+
+				while (comparaPosicao(parouEm, this->posicao) == false)
+				{
+					ros::spinOnce();
+					loop_rate.sleep();
+				}
+			}
+
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
+	}
+}
+
+void Estrategia::delay()
+{
+	std::this_thread::sleep_for(tempoDelay);
+}
+
+void Estrategia::getPosicao(const ger_drone_cbr::Position& posicao)
+{
+	this->posicao.x = posicao.x;
+	this->posicao.y = posicao.y;
+	this->posicao.z = posicao.z;
+	this->posicao.yaw = posicao.yaw;
+}
+
+void Estrategia::detectouQR(const std_msgs::String::ConstPtr& mensagem)
+{
+	if (mensagem->data.size() == 1)
+	{
+		qrLido = mensagem->data[0];
+	}
+}
+
+void Estrategia::setTopicoExterno()
+{
+	qr = no.subscribe("/qr_codes", 1000, &Estrategia::detectouQR, this);
+}
+
+void Estrategia::setTopicoInterno()
+{
+	destino = no.advertise<ger_drone_cbr::Position>("/destino", 1000);
+
+	recebePosicao = no.subscribe("/posicao", 1000, &Estrategia::getPosicao, this);
+
+	enviaComando = no.advertise<std_msgs::String>("/comando", 1000);
+}
+
+void Estrategia::irPara(float x, float y, float z, float yaw)
+{
+	ger_drone_cbr::Position posicao;
+
+	posicao.x = x;
+	posicao.y = y;
+	posicao.z = z;
+	posicao.yaw = yaw;
+
+	destino.publish(posicao);
+}
+
+void Estrategia::irPara(ger_drone_cbr::Position posicao)
+{
+	destino.publish(posicao);
 }

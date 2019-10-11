@@ -14,6 +14,8 @@ class ControleARDrone
 	private:
 		int frequencia;
 		int cameraAtual;
+
+		bool iniciado;
 	public:
 		ControleARDrone(std::string nome, int frequencia);
 	

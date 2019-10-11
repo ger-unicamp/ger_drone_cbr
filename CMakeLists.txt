@@ -67,7 +67,7 @@ catkin_package(
 ## Build ##
 ###########
 
-add_executable(estrategia src/estrategia)
+add_executable(estrategia src/estrategia_main.cpp src/estrategia.cpp)
 target_link_libraries(estrategia ${catkin_LIBRARIES})
 
 add_executable(controleARDrone src/controle.cpp src/controleARDrone.cpp)

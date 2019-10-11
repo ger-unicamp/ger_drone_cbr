@@ -21,8 +21,12 @@ int main(int argc, char **argv)
 ControleARDrone::ControleARDrone(std::string nome, int frequencia) :no(nome), loop_rate(frequencia)
 {
 	this->frequencia = frequencia;
-	servicoCamera = no.serviceClient<ardrone_autonomy::CamSelect>("/ardrone/setcamchannel");//(no.resolveName("ardrone/setcamchannel"),1);
+	//(no.resolveName("ardrone/setcamchannel"),1);
 	this->cameraAtual = 0;
+
+	setTopicoExterno();
+	setTopicoInterno();
+	setServicos();
 };
 
 void ControleARDrone::moveDrone(const ger_drone_cbr::Position& posicao)
@@ -38,44 +42,57 @@ void ControleARDrone::moveDrone(const ger_drone_cbr::Position& posicao)
 
 void ControleARDrone::sobe()
 {
-	for(int i = 0; i<14; i++)
+	if (iniciado == false)
+	{
+		for (int i = 0; i < 12; i++)
+		{
+			std::stringstream ss;
+
+			switch (i)
+			{
+
+				case 0:
+					ss << "c autoInit 500 800 4000 0.5";
+				break;
+
+				case 2:
+					ss << "c setReference $POSE$";
+				break;
+
+				case 4:
+					ss << "c setInitialReachDist 0.2";
+				break;
+
+				case 6:
+					ss << "c setStayWithinDist 0.3";
+				break;
+
+				case 8:
+					ss << "c setStayTime 3";
+				break;
+
+				case 10:
+					ss << "c lockScaleFP";
+				break;
+
+				case 12:
+					ss << "c goto 0 0 0 0";
+				break;
+			}
+			std_msgs::String comando;
+			comando.data = ss.str();
+			comandoDrone.publish(comando);
+
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
+	}
+	else
 	{
 		std::stringstream ss;
 
-		switch (i)
-		{
+		ss << "c takeoff";
 
-			case 0:
-				ss << "c autoInit 500 800 4000 0.5";
-			break;
-
-			case 2:
-				ss << "c setReference $POSE$";
-			break;
-
-			case 4:
-				ss << "c setInitialReachDist 0.2";
-			break;
-
-			case 6:
-				ss << "c setStayWithinDist 0.3";
-			break;
-
-			case 8:
-				ss << "c setStayTime 3";
-			break;
-
-			case 10:
-				ss << "c lockScaleFP";
-			break;
-
-			case 12:
-				ss << "c goto 0 0 0 0";
-			break;
-			case 14:
-				ss << "c goto 0.5 0.5 0.5 0";
-			break;
-		}
 		std_msgs::String comando;
 		comando.data = ss.str();
 		comandoDrone.publish(comando);
@@ -83,7 +100,12 @@ void ControleARDrone::sobe()
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
+	
+}
 
+void ControleARDrone::setServicos()
+{
+	servicoCamera = no.serviceClient<ardrone_autonomy::CamSelect>("/ardrone/setcamchannel");
 }
 
 void ControleARDrone::mudaCamera(int camera)
@@ -107,8 +129,7 @@ void ControleARDrone::loop()
 
 	while (ros::ok())
 	{
-		setTopicoExterno();
-		setTopicoInterno();
+		
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
