@@ -7,6 +7,7 @@
 #include <string.h>
 #include "std_msgs/String.h"
 
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "controle");
@@ -34,7 +35,6 @@ void ControleARDrone::moveDrone(const ger_drone_cbr::Position& posicao)
 	std::stringstream ss;
 
 	ss << "c goto " << posicao.x << " " << posicao.y << " " << posicao.z << " " << posicao.yaw;
-	
 	std_msgs::String comando;
 	comando.data = ss.str();
 	comandoDrone.publish(comando);
@@ -85,6 +85,8 @@ void ControleARDrone::sobe()
 
 			ros::spinOnce();
 			loop_rate.sleep();
+
+			iniciado = true;
 		}
 	}
 	else

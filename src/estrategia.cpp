@@ -8,22 +8,10 @@
 #include <chrono>         // std::chrono::seconds
 
 #include "ger_drone_cbr/Position.h"
-  
-bool comparaPosicao(ger_drone_cbr::Position a, ger_drone_cbr::Position b)
-{
-	if (abs(a.x - b.x) > 0.5 || abs(a.y - b.y) > 0.5 || abs(a.z - b.z) > 0.5 || abs(a.yaw - b.yaw) > 0.5)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
+#include "funcoesPosition.h"
 
 Estrategia::Estrategia(std::string nome, int frequencia) : no(nome), loop_rate(frequencia), tempoDelay(5000)
 {
-	
 }
 
 void Estrategia::loop()
@@ -34,6 +22,44 @@ void Estrategia::loop()
 		this->loop_rate.sleep();
 	}
 }
+
+void Estrategia::detectouQR(const std_msgs::String::ConstPtr& mensagem)
+{
+	if (mensagem->data.size() == 1)
+	{
+		qrLido = mensagem->data[0];
+	}
+}
+
+void Estrategia::getPosicao(const ger_drone_cbr::Position& posicao)
+{
+	this->posicao.x = posicao.x;
+	this->posicao.y = posicao.y;
+	this->posicao.z = posicao.z;
+	this->posicao.yaw = posicao.yaw;
+}
+
+void Estrategia::detectouBase()
+{
+}
+
+void Estrategia::irPara(float x, float y, float z, float yaw)
+{
+	ger_drone_cbr::Position posicao;
+
+	posicao.x = x;
+	posicao.y = y;
+	posicao.z = z;
+	posicao.yaw = yaw;
+
+	destino.publish(posicao);
+}
+
+void Estrategia::irPara(ger_drone_cbr::Position posicao)
+{
+	destino.publish(posicao);
+}
+
 
 void Estrategia::fase1()
 {
@@ -100,31 +126,6 @@ void Estrategia::fase1()
 	}
 }
 
-void Estrategia::delay()
-{
-	std::this_thread::sleep_for(tempoDelay);
-}
-
-void Estrategia::getPosicao(const ger_drone_cbr::Position& posicao)
-{
-	this->posicao.x = posicao.x;
-	this->posicao.y = posicao.y;
-	this->posicao.z = posicao.z;
-	this->posicao.yaw = posicao.yaw;
-}
-
-void Estrategia::detectouQR(const std_msgs::String::ConstPtr& mensagem)
-{
-	if (mensagem->data.size() == 1)
-	{
-		qrLido = mensagem->data[0];
-	}
-}
-
-void Estrategia::setTopicoExterno()
-{
-	qr = no.subscribe("/qr_codes", 1000, &Estrategia::detectouQR, this);
-}
 
 void Estrategia::setTopicoInterno()
 {
@@ -135,19 +136,21 @@ void Estrategia::setTopicoInterno()
 	enviaComando = no.advertise<std_msgs::String>("/comando", 1000);
 }
 
-void Estrategia::irPara(float x, float y, float z, float yaw)
+
+void Estrategia::setTopicoExterno()
 {
-	ger_drone_cbr::Position posicao;
-
-	posicao.x = x;
-	posicao.y = y;
-	posicao.z = z;
-	posicao.yaw = yaw;
-
-	destino.publish(posicao);
+	qr = no.subscribe("/qr_codes", 1000, &Estrategia::detectouQR, this);
 }
 
-void Estrategia::irPara(ger_drone_cbr::Position posicao)
+
+void Estrategia::delay()
 {
-	destino.publish(posicao);
+	std::this_thread::sleep_for(tempoDelay);
 }
+
+
+
+
+
+
+

@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 include_directories(${catkin_INCLUDE_DIRS})
 
+add_library(funcoesPosition src/funcoesPosition.cpp)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -63,12 +64,14 @@ catkin_package(
   DEPENDS system_lib
 )
 
+
+
 ###########
 ## Build ##
 ###########
 
-add_executable(estrategia src/estrategia_main.cpp src/estrategia.cpp)
-target_link_libraries(estrategia ${catkin_LIBRARIES})
+add_executable(estrategia src/estrategia_main.cpp src/estrategia.cpp )
+target_link_libraries(estrategia ${catkin_LIBRARIES} funcoesPosition)
 
 add_executable(controleARDrone src/controle.cpp src/controleARDrone.cpp)
 target_link_libraries(controleARDrone	 ${catkin_LIBRARIES})
