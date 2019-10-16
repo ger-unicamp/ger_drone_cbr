@@ -54,6 +54,7 @@ class Estrategia
 		
 		ros::Subscriber qr; ///<value> Recebe os QR codes lidos <para> Tópico: "/qr_codes" </para> </value>  
 		ros::Subscriber recebePosicao; ///<value> Recebe a posição do drone <para> Tópico: "/posicao" </para> </value>
+		ros::Subscriber iniciarFase; ///<value> Recebe o comando para iniciar a programação de alguma fase <para> Tópico: "/iniciarFase" </para> </value>
 
 		ros::Publisher enviaComando; ///<value> Envia um comando para o drone <para> Tópico: "/comando" </para> </value>
 		ros::Publisher destino; ///<value> Define o destino do drone <para> Tópico: "/destino" </value>
@@ -62,6 +63,11 @@ class Estrategia
 
 		ger_drone_cbr::Position posicao; ///<value> Posição atual do drone </value>
 		ger_drone_cbr::Position* trajetoria; ///<value> Trajetória desejada para o drone </value>
+		ger_drone_cbr::Position* base; ///<value> Posições das bases (exceto costeira) </value>
+		ger_drone_cbr::Position baseCosteria; ///<value> Posição da base costeira </value>
+
+		bool visitado[15]; ///<value> Registra se alguma base já foi visitada nessa fase </value>
+		int fase; ///<value> Armazena a fase atual </value> 
 
 		char qrLido; ///<value> Caractér do QR code lido </value>
 		bool base; ///<value> Se existe base no campo de visão do drone </value>
@@ -75,4 +81,27 @@ class Estrategia
 		///<summary> Para o nó </summary>
 		///<remarks> Tempo definido em "tempoDelay" </remarks>
 		void delay();
+
+		///<summary> Escreve as bases localizadas em um arquivo </summary>
+		void escreveBase(); 
+
+		///<summary> Lê as bases registradas no arquivo </summary>
+		void leBase();
+
+		///<summary> Verifica se uma base já foi visitada </summary>
+		///<param name="posicao"> A posição da base que será verificada </param>
+		///<retuns> "True" se a base já tiver sido visitada </retuns>
+		bool jaVisitado(ger_drone_cbr::Position posicao);
+
+		///<summary> Finaliza a fase, retornando para a base costeira </summary>
+		void finalizar();
+
+		///<summary> Realiza um loop do ROS </summary>
+		void atualizar();
+
+		///<summary> Pousa o drone </summary>
+		void pousar();
+
+		///<summary> Realiza a fase 2 </summary>
+		void fase2();
 };

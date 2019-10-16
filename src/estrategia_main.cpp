@@ -4,7 +4,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "estrategia");
 
-	Estrategia estrategia("estrategia", 100);
+	Estrategia estrategia("estrategia", 150);
 
 	estrategia.loop();
 

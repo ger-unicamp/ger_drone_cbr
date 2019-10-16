@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "controle");
 
-	ControleARDrone controle("controle", 10);
+	ControleARDrone controle("controle", 150);
 
 	controle.loop();
 
