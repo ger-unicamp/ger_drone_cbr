@@ -2,10 +2,15 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include <std_msgs/Int8.h>
+#include <std_msgs/Empty.h>
 #include <sstream>
 #include <std_srvs/Empty.h>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
+#include <fstream>
+#include <ostream>
+#include <iostream>
 
 #include "ger_drone_cbr/Position.h"
 #include "funcoesPosition.h"
@@ -26,12 +31,49 @@ Estrategia::Estrategia(std::string nome, int frequencia) : no(nome), loop_rate(f
 
 void Estrategia::fase2()
 {
+	std_msgs::String comando;
 
+	std::stringstream ss;
+
+	ss << "subir";
+
+	comando.data = ss.str();
+	enviaComando.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();
+
+	delay();
+
+	trajetoria = geraTrajetoria();
+
+	this->base = (ger_drone_cbr::Position*) malloc(15 * sizeof(ger_drone_cbr::Position*));
+
+	int indiceBase = 0;
+
+	for (int i = 0; i < 15; i++)
+	{
+		base[i].x = 0;
+		base[i].y = 0;
+		base[i].z = 0;
+		base[i].yaw = 0;
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		irPara(trajetoria[i]);
+
+		while (comparaPosicao(trajetoria[i], this->posicao) == false)
+		{
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
+	}
 }
 
-void Estrategia::recebeFase(const std_msgs::String::int8& mensagem)
+void Estrategia::recebeFase(const std_msgs::Int8::ConstPtr& mensagem)
 {
-	fase = mensagem.data;
+	fase = mensagem->data;
 }
 
 
@@ -74,7 +116,7 @@ bool Estrategia::jaVisitado(ger_drone_cbr::Position posicao)
 {
 	for (int i = 0; i < 15; i++)
 	{
-		if (comparaPosicao(base[i], posicao, 0.2)
+		if (comparaPosicao(base[i], posicao, 0.2))
 		{
 			return true;
 		}
@@ -89,14 +131,14 @@ void Estrategia::escreveBase()
 
 	arquivo.open("~/DroneCBR/base.txt");
 
-	arquivo.seekp(0, ios::beg);
+	arquivo.seekp(0, std::ios::beg);
 
 	for (int i = 0; i < 15; i++)
 	{
-		arquivo << base[i].x << endl;
-		arquivo << base[i].y << endl;
-		arquivo << base[i].z << endl;
-		arquivo << base[i].yaw << endl;
+		arquivo << base[i].x << std::endl;
+		arquivo << base[i].y << std::endl;
+		arquivo << base[i].z << std::endl;
+		arquivo << base[i].yaw << std::endl;
 	}
 
 	arquivo.close();
@@ -106,11 +148,11 @@ void Estrategia::leBase()
 {
 	std::ifstream  arquivo;
 
-	base = malloc(15 * sizeof(ger_drone_cbr::Position));
+	base = (ger_drone_cbr::Position*) malloc(15 * sizeof(ger_drone_cbr::Position));
 
 	arquivo.open("~/DroneCBR/base.txt");
 
-	arquivo.seekp(0, ios::beg);
+	arquivo.seekg(0, std::ios::beg);
 
 	for (int i = 0; i < 15; i++)
 	{
@@ -133,6 +175,7 @@ void Estrategia::loop()
 				fase1();
 			break;
 			case 2:
+				fase2();
 			break;
 			case 3:
 			break;
@@ -161,8 +204,67 @@ void Estrategia::getPosicao(const ger_drone_cbr::Position& posicao)
 	this->posicao.yaw = posicao.yaw;
 }
 
-void Estrategia::detectouBase()
+void Estrategia::detectouBase(std_msgs::Empty& msg )
 {
+	baseEncontrada = true;
+}
+
+ger_drone_cbr::Position* Estrategia::geraTrajetoria()
+{
+	ger_drone_cbr::Position* trajetoria = (ger_drone_cbr::Position*) malloc(16*sizeof(ger_drone_cbr::Position));
+
+	ger_drone_cbr::Position vetor[4]; //Translações entre os pontos
+
+	vetor[0].x = 0;
+	vetor[0].y = 4.1;
+	vetor[0].z = 0;
+	vetor[0].yaw = 0;
+
+	vetor[1].x = 1.8;
+	vetor[1].y = 0;
+	vetor[1].z = 0;
+	vetor[1].yaw = 0;
+
+	vetor[2].x = 0;
+	vetor[2].y = -4.1;
+	vetor[2].z = 0;
+	vetor[2].yaw = 0;
+
+	vetor[3].x = 1.8;
+	vetor[3].y = 0;
+	vetor[3].z = 0;
+	vetor[3].yaw = 0;
+
+	trajetoria[0].x = 0.3;
+	trajetoria[0].y = 0.3;
+	trajetoria[0].y = 1.25;
+	trajetoria[0].yaw = 0;
+
+	int indiceVetor = 0;
+
+	for(int  i = 1; i<17; i++)
+	{
+		trajetoria[i] = somaPosicao(trajetoria[i-1], vetor[indiceVetor]);
+
+		indiceVetor+=1;
+
+		if(indiceVetor == 4)
+		{
+			indiceVetor = 0;
+		}
+	}
+
+	trajetoria[15].x = 13.9;
+
+	for(int i = 0; i<15; i++)
+	{
+		trajetoria[i].x/=4;
+		trajetoria[i].y/=4;
+		trajetoria[i].z/=4;
+		trajetoria[i].yaw/=4;
+	}
+
+	return trajetoria;
 }
 
 void Estrategia::irPara(float x, float y, float z, float yaw)
@@ -199,9 +301,9 @@ void Estrategia::fase1()
 
 	delay();
 
-	trajetoria = (ger_drone_cbr::Position*) malloc(8 * sizeof(ger_drone_cbr::Position));
+	trajetoria = geraTrajetoria();
 
-	this->base = malloc(15 * sizeof(ger_drone_cbr::Position*));
+	this->base = (ger_drone_cbr::Position*) malloc(15 * sizeof(ger_drone_cbr::Position*));
 
 	int indiceBase = 0;
 
@@ -219,7 +321,7 @@ void Estrategia::fase1()
 
 		while (comparaPosicao(trajetoria[i], this->posicao) == false)
 		{
-			if (base == true)
+			if (baseEncontrada == true)
 			{
 				ss.str("para");
 
@@ -231,8 +333,8 @@ void Estrategia::fase1()
 
 				ger_drone_cbr::Position parouEm = this->posicao;
 
-				//////////////////////////////////////Verificar se a base j� foi visitada!
-				if (!jaVisitado(ger_drone_cbr::Position posicao))
+				//////////////////////////////////////Verificar se a base j� foi visitada!
+				if (!jaVisitado(posicao) )
 				{
 					
 

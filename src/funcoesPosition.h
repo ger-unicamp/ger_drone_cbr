@@ -23,3 +23,5 @@ double tamanho(ger_drone_cbr::Position a);
 ///<param name="b"> Segunda posição </param>
 ///<returns> Distância entre as duas posições </returns>
 double distancia(ger_drone_cbr::Position a, ger_drone_cbr::Position b);
+
+ger_drone_cbr::Position somaPosicao(ger_drone_cbr::Position a, ger_drone_cbr::Position b);

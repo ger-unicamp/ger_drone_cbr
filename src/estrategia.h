@@ -2,8 +2,10 @@
 #include "std_msgs/String.h"
 #include <sstream>
 #include <std_srvs/Empty.h>
+#include <std_msgs/Empty.h>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
+#include <std_msgs/Int8.h>
 
 #include "ger_drone_cbr/Position.h"
 
@@ -31,9 +33,10 @@ class Estrategia
 		void getPosicao(const ger_drone_cbr::Position& posicao);
 		
 		///<summary> Recebe o objeto detectado pelo nó detector </summary>
-		void detectouBase();
+		void recebeFase(const std_msgs::Int8::ConstPtr& mensagem);
 
-		
+		void detectouBase(std_msgs::Empty& msg );
+
 		///<summary> Envia posição desejada ao nó de controle </summary>
 		///<param name="x"> Coordenada "x" da posição </param>
 		///<param name="y"> Coordenada "y" da posição </param>
@@ -64,13 +67,13 @@ class Estrategia
 		ger_drone_cbr::Position posicao; ///<value> Posição atual do drone </value>
 		ger_drone_cbr::Position* trajetoria; ///<value> Trajetória desejada para o drone </value>
 		ger_drone_cbr::Position* base; ///<value> Posições das bases (exceto costeira) </value>
-		ger_drone_cbr::Position baseCosteria; ///<value> Posição da base costeira </value>
+		ger_drone_cbr::Position baseCosteira; ///<value> Posição da base costeira </value>
 
 		bool visitado[15]; ///<value> Registra se alguma base já foi visitada nessa fase </value>
 		int fase; ///<value> Armazena a fase atual </value> 
 
 		char qrLido; ///<value> Caractér do QR code lido </value>
-		bool base; ///<value> Se existe base no campo de visão do drone </value>
+		bool baseEncontrada; ///<value> Se existe base no campo de visão do drone </value>
 
 		///<summary> Se inscreve nos tópicos internos (dos nós do pacote) </summary>
 		void setTopicoInterno();
@@ -104,4 +107,6 @@ class Estrategia
 
 		///<summary> Realiza a fase 2 </summary>
 		void fase2();
+
+		ger_drone_cbr::Position* geraTrajetoria();
 };
