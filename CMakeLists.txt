@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 include_directories(${catkin_INCLUDE_DIRS})
 
-add_library(funcoesPosition src/funcoesPosition.cpp)
+
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -59,8 +59,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   #INCLUDE_DIRS include
-  LIBRARIES ger_drone_cbr
-  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs
+  LIBRARIES ger_drone_cbr funcoesPosition
+  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs ardrone_autonomy
   DEPENDS system_lib
 )
 
@@ -82,11 +82,16 @@ target_link_libraries(rota ${catkin_LIBRARIES})
 add_executable(interface src/interface)
 target_link_libraries(interface ${catkin_LIBRARIES})
 
+add_library(funcoesPosition src/funcoesPosition.cpp)
+target_link_libraries(funcoesPosition ${catkin_LIBRARIES})
+#link_libraries(funcoePosition ${catkin_LIBRARIES})
 
 add_dependencies(estrategia ${catkin_EXPORTED_TARGETS})
 add_dependencies(controleARDrone ${catkin_EXPORTED_TARGETS})
 add_dependencies(rota ${catkin_EXPORTED_TARGETS})
 add_dependencies(interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(funcoesPosition ${catkin_EXPORTED_TARGETS})
+
 
 #############
 ## Install ##
