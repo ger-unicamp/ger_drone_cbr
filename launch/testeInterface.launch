@@ -1,0 +1,5 @@
+<launch>
+
+    <node name="interface" pkg="ger_drone_cbr" type="interface2.py"/> 
+
+</launch>

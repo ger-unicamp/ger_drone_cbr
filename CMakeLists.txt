@@ -79,9 +79,6 @@ target_link_libraries(controleARDrone	 ${catkin_LIBRARIES})
 add_executable(rota src/rota)
 target_link_libraries(rota ${catkin_LIBRARIES})
 
-add_executable(interface src/interface)
-target_link_libraries(interface ${catkin_LIBRARIES})
-
 add_library(funcoesPosition src/funcoesPosition.cpp)
 target_link_libraries(funcoesPosition ${catkin_LIBRARIES})
 #link_libraries(funcoePosition ${catkin_LIBRARIES})
@@ -89,7 +86,6 @@ target_link_libraries(funcoesPosition ${catkin_LIBRARIES})
 add_dependencies(estrategia ${catkin_EXPORTED_TARGETS})
 add_dependencies(controleARDrone ${catkin_EXPORTED_TARGETS})
 add_dependencies(rota ${catkin_EXPORTED_TARGETS})
-add_dependencies(interface ${catkin_EXPORTED_TARGETS})
 add_dependencies(funcoesPosition ${catkin_EXPORTED_TARGETS})
 
 
