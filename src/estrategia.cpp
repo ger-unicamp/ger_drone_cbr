@@ -80,6 +80,8 @@ void Estrategia::recebeFase(const std_msgs::Int8::ConstPtr& mensagem)
 
 void Estrategia::pousar()
 {
+	parar();
+	
 	std_msgs::String comando;
 
 	std::stringstream ss;
@@ -100,7 +102,7 @@ void Estrategia::atualizar()
 
 void Estrategia::finalizar()
 {
-	////if voando
+	parar();
 
 	irPara(baseCosteira);
 
@@ -284,8 +286,22 @@ void Estrategia::irPara(ger_drone_cbr::Position posicao)
 	destino.publish(posicao);
 }
 
+void Estrategia::parar()
+{
+	std_msgs::String comando;
 
-void Estrategia::fase1()
+	std::stringstream ss;
+
+	ss.str("parar");
+
+	comando.data = ss.str();
+	enviaComando.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();
+}
+
+void Estrategia::subir()
 {
 	std_msgs::String comando;
 
@@ -300,6 +316,11 @@ void Estrategia::fase1()
 	loop_rate.sleep();
 
 	delay();
+}
+
+void Estrategia::fase1()
+{
+	subir();
 
 	trajetoria = geraTrajetoria();
 
@@ -323,28 +344,14 @@ void Estrategia::fase1()
 		{
 			if (baseEncontrada == true)
 			{
-				ss.str("para");
-
-				comando.data = ss.str();
-				enviaComando.publish(comando);
-
-				ros::spinOnce();
-				loop_rate.sleep();
+				parar();
 
 				ger_drone_cbr::Position parouEm = this->posicao;
 
 				//////////////////////////////////////Verificar se a base j� foi visitada!
 				if (!jaVisitado(posicao) )
 				{
-					
-
-					ss.str("pousar");
-
-					comando.data = ss.str();
-					enviaComando.publish(comando);
-
-					ros::spinOnce();
-					loop_rate.sleep();
+					pousar();
 
 					//while(voando == true)
 
@@ -354,7 +361,7 @@ void Estrategia::fase1()
 					indiceBase += 1;
 
 					
-					ss.str("subir");
+					subir();
 
 					irPara(parouEm);
 				}
@@ -380,8 +387,20 @@ void Estrategia::setTopicoInterno()
 	recebePosicao = no.subscribe("/posicao", 1000, &Estrategia::getPosicao, this);
 	iniciarFase = no.subscribe("/iniciarFase", 1000, &Estrategia::recebeFase, this);
 
+	interface = no.subscribe("/comandoInterface", 1000, &Estrategia::recebeInterface, this);
 }
 
+void Estrategia::recebeInterface(const std_msgs::String comando)
+{
+	if (strcmp(comando.data.c_str(), "finalizar") == 0)
+	{
+		finalizar();
+	}
+	else if(strcmp(comando.data.c_str(), "pousar") == 0)
+	{
+		pousar();
+	}
+}
 
 void Estrategia::setTopicoExterno()
 {

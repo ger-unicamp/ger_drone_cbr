@@ -8,7 +8,7 @@
 #include <string.h>
 #include "std_msgs/String.h"
 
-///<summary> Efetua a conversão entre os comandos internos para os comandos específicos do drone utilizado</summary>
+///<summary> Efetua a conversï¿½o entre os comandos internos para os comandos especï¿½ficos do drone utilizado</summary>
 class ControleARDrone
 {
 	private:
@@ -20,26 +20,26 @@ class ControleARDrone
 		ControleARDrone(std::string nome, int frequencia);
 	
 		
-		ros::NodeHandle no;///<value> Controla o nó </value>
-		ros::Rate loop_rate;///<value> Controla a frequência do nó </value>
-		ros::Subscriber destino; ///<value> Inscreve no tópico para receber posição para qual o robô deve ir. </value>
+		ros::NodeHandle no;///<value> Controla o nï¿½ </value>
+		ros::Rate loop_rate;///<value> Controla a frequï¿½ncia do nï¿½ </value>
+		ros::Subscriber destino; ///<value> Inscreve no tï¿½pico para receber posiï¿½ï¿½o para qual o robï¿½ deve ir. </value>
 		ros::ServiceClient servicoCamera;
 		
-		ros::Publisher comandoDrone; ///<value> Inscreve no tópico para enviar comandos ao drone </value>
+		ros::Publisher comandoDrone; ///<value> Inscreve no tï¿½pico para enviar comandos ao drone </value>
 		ros::Subscriber getPosicao;
 		ros::Publisher setPosicao;
 		ros::Subscriber comandoInterno;
 
-		///<summary> Se inscreve nos tópicos internos dos nós no pacote </summary>
+		///<summary> Se inscreve nos tï¿½picos internos dos nï¿½s no pacote </summary>
 		void setTopicoInterno();
 
-		///<summary> Se inscreve nos tópicos externos, específicos do drone</summary>
+		///<summary> Se inscreve nos tï¿½picos externos, especï¿½ficos do drone</summary>
 		void setTopicoExterno();
 
-		///<summary> Cria os clientes para os serviços utilizados </summary>
+		///<summary> Cria os clientes para os serviï¿½os utilizados </summary>
 		void setServicos();
 
-		///<summary> Loop principal do nó </summary>
+		///<summary> Loop principal do nï¿½ </summary>
 		void loop();
 	
 		void callBack(const std_msgs::String::ConstPtr& mensagem);
@@ -50,14 +50,17 @@ class ControleARDrone
 		///<summary> Pousa o drone </summary>
 		void pousa();
 
+		///<summary> Para o drone </summary>
+		void para();
+
 		///<summary> Envia o comando de deslocamento ao drone </summary>
-		///<param name="posicao"> Posição para qual o drone deve ir </summary>
+		///<param name="posicao"> Posiï¿½ï¿½o para qual o drone deve ir </summary>
 		void moveDrone(const ger_drone_cbr::Position& posicao); //::ConstPtr
 
-		///<summary> Troca a câmera do drone </summary>
+		///<summary> Troca a cï¿½mera do drone </summary>
 		void mudaCamera(int camera);
 
-		///<summary> Verifica a localização atual do drone </summary>
+		///<summary> Verifica a localizaï¿½ï¿½o atual do drone </summary>
 		void getLocalizacao(const tum_ardrone::filter_state& posicao);
 
 		///<summary> Envia um comando ao drone </summary>

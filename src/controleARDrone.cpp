@@ -159,13 +159,28 @@ void ControleARDrone::enviaComando(const std_msgs::String comando)
 	{
 		
 	}
+	else if(strcmp(comando.data.c_str(), "parar") == 0)
+	{
+		para();
+	}
+}
+
+void ControleARDrone::para()
+{
+	std::stringstream ss;
+
+	ss << "c clearCommands";
+
+	std_msgs::String comando;
+	comando.data = ss.str();
+	comandoDrone.publish(comando);
 }
 
 void ControleARDrone::pousa()
 {
 
 	std::stringstream ss;
-
+	
 	ss << "c land";
 
 	std_msgs::String comando;

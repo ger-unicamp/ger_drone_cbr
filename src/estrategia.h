@@ -51,6 +51,17 @@ class Estrategia
 		///<summary> Executa a programação para a fase 1 </summary>
 		void fase1();
 
+		///<summary> Recebe o comando vindo da interface </summary>
+		///<param name="comando"> O comando vindo </param>
+		void recebeInterface(const std_msgs::String comando);
+
+		///<summary> Para o drone </summary>
+		void parar();
+
+		
+		///<summary> Sobe o drone </summary>
+		void subir();
+
 	private:
 		ros::NodeHandle no; ///<value> Controla o n� </value>
 		ros::Rate loop_rate; ///<value> Controla a frequ�ncia do n� </value>
@@ -58,6 +69,7 @@ class Estrategia
 		ros::Subscriber qr; ///<value> Recebe os QR codes lidos <para> Tópico: "/qr_codes" </para> </value>  
 		ros::Subscriber recebePosicao; ///<value> Recebe a posição do drone <para> Tópico: "/posicao" </para> </value>
 		ros::Subscriber iniciarFase; ///<value> Recebe o comando para iniciar a programação de alguma fase <para> Tópico: "/iniciarFase" </para> </value>
+		ros::Subscriber interface; ///<value> Recebe o comando da interface </value>
 
 		ros::Publisher enviaComando; ///<value> Envia um comando para o drone <para> Tópico: "/comando" </para> </value>
 		ros::Publisher destino; ///<value> Define o destino do drone <para> Tópico: "/destino" </value>

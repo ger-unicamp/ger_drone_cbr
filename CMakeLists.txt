@@ -14,7 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   std_srvs
   message_generation
-
+  #opencv3
+  cv_bridge
   ##ardrone_autonomy
 
 )
