@@ -1,0 +1,37 @@
+<launch>
+  
+   <arg name="droneip" default="192.168.1.1" />	
+   <node pkg="ardrone_autonomy" type="ardrone_driver" name="ardrone_driver" args="-ip $(arg droneip)"  output="screen"/>
+
+   <group ns="CBR">
+	   <node pkg="ger_drone_cbr" type="estrategia" name="estrategia">
+            <remap from="/qr_codes" to="/processaVideo/qr_codes" />
+		    <remap from="/destino" to="/ir_para" />
+	   </node>
+	   <node pkg="ger_drone_cbr" type="controleARDrone" name="controle"/>
+       <node name="interface" pkg="ger_drone_cbr" type="interface2.py"/>
+   </group>   
+
+   <group ns="processaVideo">
+	   <node pkg="nodelet" type="nodelet" name="detectaQR" args="standalone qr_detector/qr_detector_nodelet">
+		   <remap from="image" to="/camera_baixo/raw" />
+	   </node>
+
+        <node pkg="find_object_2d" type="find_object_2d" name="find_object">
+            <param name="objects_path" type="string" value="~/GERDrone/Objetos"/>
+            <remap from="image" to="/camera_baixo/raw"/>
+        </node>
+        
+        <node pkg="find_object_2d" type="print_objects_detected" name="print_object"/>
+
+        <node pkg="ger_drone_cbr" type="ip_camera.py" name="camera_baixo"/>
+   </group>
+
+   <node name="drone_stateestimation" pkg="tum_ardrone" type="drone_stateestimation">	
+      <remap from="ardrone/image_raw" to="/ardrone/front/image_raw"/>
+   </node>
+   <node name="drone_autopilot" pkg="tum_ardrone" type="drone_autopilot"/>
+   <node name="drone_gui" pkg="tum_ardrone" type="drone_gui"/>
+
+   
+</launch>

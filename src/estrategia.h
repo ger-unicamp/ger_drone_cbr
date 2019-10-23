@@ -76,8 +76,8 @@ class Estrategia
 		std::chrono::milliseconds tempoDelay; ///<value> Tempo do delay </value>
 
 		ger_drone_cbr::Position posicao; ///<value> Posição atual do drone </value>
-		ger_drone_cbr::Position* trajetoria; ///<value> Trajetória desejada para o drone </value>
-		ger_drone_cbr::Position* base; ///<value> Posições das bases (exceto costeira) </value>
+		ger_drone_cbr::Position trajetoria[16]; ///<value> Trajetória desejada para o drone </value>
+		ger_drone_cbr::Position base[15]; ///<value> Posições das bases (exceto costeira) </value>
 		ger_drone_cbr::Position baseCosteira; ///<value> Posição da base costeira </value>
 		ger_drone_cbr::Position posicaoBase;
 

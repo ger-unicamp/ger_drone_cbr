@@ -7,6 +7,9 @@
 #include "ger_drone_cbr/Position.h"
 #include <string.h>
 #include "std_msgs/String.h"
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
+
 
 ///<summary> Efetua a convers�o entre os comandos internos para os comandos espec�ficos do drone utilizado</summary>
 class ControleARDrone
@@ -18,8 +21,9 @@ class ControleARDrone
 		bool iniciado;
 	public:
 		ControleARDrone(std::string nome, int frequencia);
-	
-		
+
+		std::chrono::milliseconds tempoDelay; ///<value> Tempo do delay </value>
+
 		ros::NodeHandle no;///<value> Controla o n� </value>
 		ros::Rate loop_rate;///<value> Controla a frequ�ncia do n� </value>
 		ros::Subscriber destino; ///<value> Inscreve no t�pico para receber posi��o para qual o rob� deve ir. </value>

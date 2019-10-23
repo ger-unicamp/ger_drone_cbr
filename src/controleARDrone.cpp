@@ -7,7 +7,8 @@
 #include "ger_drone_cbr/Position.h"
 #include <string.h>
 #include "std_msgs/String.h"
-
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 int main(int argc, char **argv)
 {
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-ControleARDrone::ControleARDrone(std::string nome, int frequencia) :no(nome), loop_rate(frequencia)
+ControleARDrone::ControleARDrone(std::string nome, int frequencia) :no(nome), loop_rate(frequencia), tempoDelay(2500)
 {
 	this->frequencia = frequencia;
 	//(no.resolveName("ardrone/setcamchannel"),1);
@@ -45,7 +46,7 @@ void ControleARDrone::sobe()
 {
 	if (iniciado == false)
 	{
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < 7; i++)
 		{
 			std::stringstream ss;
 
@@ -56,27 +57,28 @@ void ControleARDrone::sobe()
 					ss << "c autoInit 500 800 4000 0.5";
 				break;
 
-				case 2:
+				case 5:
+					std::this_thread::sleep_for(tempoDelay);
 					ss << "c setReference $POSE$";
 				break;
 
-				case 4:
+				case 1:
 					ss << "c setInitialReachDist 0.2";
 				break;
 
-				case 6:
+				case 2:
 					ss << "c setStayWithinDist 0.3";
 				break;
 
-				case 8:
+				case 3:
 					ss << "c setStayTime 3";
 				break;
 
-				case 10:
+				case 4:
 					ss << "c lockScaleFP";
 				break;
 
-				case 12:
+				case 6:
 					ss << "c goto 0 0 0 0";
 				break;
 			}
