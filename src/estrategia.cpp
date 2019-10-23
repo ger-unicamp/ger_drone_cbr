@@ -14,6 +14,7 @@
 
 #include "ger_drone_cbr/Position.h"
 #include "funcoesPosition.h"
+#include <geometry_msgs/Point.h>
 
 Estrategia::Estrategia(std::string nome, int frequencia) : no(nome), loop_rate(frequencia), tempoDelay(5000)
 {
@@ -96,6 +97,7 @@ void Estrategia::pousar()
 
 void Estrategia::atualizar()
 {
+	baseEncontrada = false;
 	ros::spinOnce();
 	this->loop_rate.sleep();
 }
@@ -206,10 +208,6 @@ void Estrategia::getPosicao(const ger_drone_cbr::Position& posicao)
 	this->posicao.yaw = posicao.yaw;
 }
 
-void Estrategia::detectouBase(std_msgs::Empty& msg )
-{
-	baseEncontrada = true;
-}
 
 ger_drone_cbr::Position* Estrategia::geraTrajetoria()
 {
@@ -367,13 +365,11 @@ void Estrategia::fase1()
 				}
 				while (comparaPosicao(parouEm, this->posicao) == false)
 				{
-					ros::spinOnce();
-					loop_rate.sleep();
+					atualizar();
 				}
 			}
 
-			ros::spinOnce();
-			loop_rate.sleep();
+			atualizar();
 		}
 	}
 }
@@ -405,8 +401,15 @@ void Estrategia::recebeInterface(const std_msgs::String comando)
 void Estrategia::setTopicoExterno()
 {
 	qr = no.subscribe("/qr_codes", 1000, &Estrategia::detectouQR, this);
+	objeto = no.subscribe("/objeto_detectado", 1000, &Estrategia::detectouBase, this);
 }
 
+void Estrategia::detectouBase(const geometry_msgs::Point baseDetectada)
+{ 
+	baseEncontrada = true;
+	posicaoBase.x = baseDetectada.x;
+	posicaoBase.y = baseDetectada.y;
+}
 
 void Estrategia::delay()
 {

@@ -9,15 +9,14 @@ project(ger_drone_cbr)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  rospy
+  rospy 
   sensor_msgs
   std_msgs
   std_srvs
   message_generation
-  #opencv3
+  #opencv2
   cv_bridge
   ##ardrone_autonomy
-
 )
 
 
@@ -61,11 +60,9 @@ generate_messages(
 catkin_package(
   #INCLUDE_DIRS include
   LIBRARIES ger_drone_cbr funcoesPosition
-  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs ardrone_autonomy
-  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs ardrone_autonomy 
+  DEPENDS system_lib 
 )
-
-
 
 ###########
 ## Build ##

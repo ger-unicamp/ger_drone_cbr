@@ -24,7 +24,8 @@ class ControleARDrone
 		ros::Rate loop_rate;///<value> Controla a frequ�ncia do n� </value>
 		ros::Subscriber destino; ///<value> Inscreve no t�pico para receber posi��o para qual o rob� deve ir. </value>
 		ros::ServiceClient servicoCamera;
-		
+		ros::ServiceClient servicoLed;
+
 		ros::Publisher comandoDrone; ///<value> Inscreve no t�pico para enviar comandos ao drone </value>
 		ros::Subscriber getPosicao;
 		ros::Publisher setPosicao;
@@ -65,4 +66,10 @@ class ControleARDrone
 
 		///<summary> Envia um comando ao drone </summary>
 		void enviaComando(const std_msgs::String comando);
+
+		///<summary> Pisca o led verde </summary>
+		void ledVerde();
+
+		///<summary> Pisca o led vermelho </summary>
+		void ledVermelho();
 };

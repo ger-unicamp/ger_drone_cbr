@@ -2,6 +2,7 @@
 #include "ros/ros.h"
 #include <std_srvs/Empty.h>
 #include <ardrone_autonomy/CamSelect.h>
+#include <ardrone_autonomy/LedAnim.h>
 #include <tum_ardrone/filter_state.h>
 #include "ger_drone_cbr/Position.h"
 #include <string.h>
@@ -108,6 +109,7 @@ void ControleARDrone::sobe()
 void ControleARDrone::setServicos()
 {
 	servicoCamera = no.serviceClient<ardrone_autonomy::CamSelect>("/ardrone/setcamchannel");
+	servicoLed = no.serviceClient<ardrone_autonomy::LedAnim>("/ardrone/setledanimation");
 }
 
 void ControleARDrone::mudaCamera(int camera)
@@ -145,6 +147,28 @@ void ControleARDrone::setTopicoInterno()
 	setPosicao = no.advertise<ger_drone_cbr::Position>("/posicao", 1000);
 }
 
+void ControleARDrone::ledVermelho()
+{
+	ardrone_autonomy::LedAnim led;
+	
+	led.request.type = 2;
+	led.request.freq = 2;
+	led.request.duration = 5;
+
+	servicoLed.call(led);
+}
+
+void ControleARDrone::ledVerde()
+{
+	ardrone_autonomy::LedAnim led;
+	
+	led.request.type = 2;
+	led.request.freq = 2;
+	led.request.duration = 5;
+
+	servicoLed.call(led);
+}
+
 void ControleARDrone::enviaComando(const std_msgs::String comando)
 {
 	if (strcmp(comando.data.c_str(), "subir") == 0)
@@ -157,7 +181,11 @@ void ControleARDrone::enviaComando(const std_msgs::String comando)
 	}
 	else if (strcmp(comando.data.c_str(), "ledVermelho") == 0)
 	{
-		
+		ledVermelho();
+	}
+	else if (strcmp(comando.data.c_str(), "ledVerde") == 0)
+	{
+		ledVerde();
 	}
 	else if(strcmp(comando.data.c_str(), "parar") == 0)
 	{

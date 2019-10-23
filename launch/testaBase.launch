@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object">
+        <param name="objects_path" type="string" value="~/GERDrone/Objetos"/>
+        <remap from="image" to="/cam/image_raw"/>
+    </node>
+    <node pkg="usb_cam" type="usb_cam_node" name="cam"/>
+</launch>

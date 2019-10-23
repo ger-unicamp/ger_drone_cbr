@@ -8,7 +8,7 @@
 #include <std_msgs/Int8.h>
 
 #include "ger_drone_cbr/Position.h"
-
+#include <geometry_msgs/Point.h>
 
 class Estrategia
 {
@@ -34,8 +34,6 @@ class Estrategia
 		
 		///<summary> Recebe o objeto detectado pelo nó detector </summary>
 		void recebeFase(const std_msgs::Int8::ConstPtr& mensagem);
-
-		void detectouBase(std_msgs::Empty& msg );
 
 		///<summary> Envia posição desejada ao nó de controle </summary>
 		///<param name="x"> Coordenada "x" da posição </param>
@@ -70,6 +68,7 @@ class Estrategia
 		ros::Subscriber recebePosicao; ///<value> Recebe a posição do drone <para> Tópico: "/posicao" </para> </value>
 		ros::Subscriber iniciarFase; ///<value> Recebe o comando para iniciar a programação de alguma fase <para> Tópico: "/iniciarFase" </para> </value>
 		ros::Subscriber interface; ///<value> Recebe o comando da interface </value>
+		ros::Subscriber objeto; ///<value> Recebe o objeto identificado pela câmera </value>
 
 		ros::Publisher enviaComando; ///<value> Envia um comando para o drone <para> Tópico: "/comando" </para> </value>
 		ros::Publisher destino; ///<value> Define o destino do drone <para> Tópico: "/destino" </value>
@@ -80,6 +79,7 @@ class Estrategia
 		ger_drone_cbr::Position* trajetoria; ///<value> Trajetória desejada para o drone </value>
 		ger_drone_cbr::Position* base; ///<value> Posições das bases (exceto costeira) </value>
 		ger_drone_cbr::Position baseCosteira; ///<value> Posição da base costeira </value>
+		ger_drone_cbr::Position posicaoBase;
 
 		bool visitado[15]; ///<value> Registra se alguma base já foi visitada nessa fase </value>
 		int fase; ///<value> Armazena a fase atual </value> 
@@ -120,5 +120,9 @@ class Estrategia
 		///<summary> Realiza a fase 2 </summary>
 		void fase2();
 
+		
 		ger_drone_cbr::Position* geraTrajetoria();
+
+		///<summary> Recebe a base detectada </summary>
+		void detectouBase(const geometry_msgs::Point baseDetectada);
 };
