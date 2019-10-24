@@ -4,4 +4,6 @@
         <remap from="image" to="/cam/image_raw"/>
     </node>
     <node pkg="usb_cam" type="usb_cam_node" name="cam"/>
+
+    <node pkg="find_object_2d" type="print_objects_detected" name="print_object"/>
 </launch>

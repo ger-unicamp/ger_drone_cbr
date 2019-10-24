@@ -19,6 +19,8 @@ class ControleARDrone
 		int cameraAtual;
 
 		bool iniciado;
+
+		bool terminado;
 	public:
 		ControleARDrone(std::string nome, int frequencia);
 
@@ -34,9 +36,14 @@ class ControleARDrone
 		ros::Subscriber getPosicao;
 		ros::Publisher setPosicao;
 		ros::Subscriber comandoInterno;
+		ros::Publisher enviaFim;
+		ros::Subscriber tumComand;
 
 		///<summary> Se inscreve nos t�picos internos dos n�s no pacote </summary>
 		void setTopicoInterno();
+
+		///<summary> Recebe o estado atual do drone (erro da posição) </summary>
+		void recebeEstado(const std_msgs::String mensagem);
 
 		///<summary> Se inscreve nos t�picos externos, espec�ficos do drone</summary>
 		void setTopicoExterno();
@@ -76,4 +83,6 @@ class ControleARDrone
 
 		///<summary> Pisca o led vermelho </summary>
 		void ledVermelho();
+
+		void terminou();
 };

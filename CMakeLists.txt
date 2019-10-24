@@ -60,7 +60,7 @@ generate_messages(
 catkin_package(
   #INCLUDE_DIRS include
   LIBRARIES ger_drone_cbr funcoesPosition
-  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs ardrone_autonomy 
+  CATKIN_DEPENDS message_runtime roscpp rospy sensor_msgs std_msgs ardrone_autonomy sound_play
   DEPENDS system_lib 
 )
 

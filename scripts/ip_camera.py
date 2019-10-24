@@ -16,7 +16,9 @@ def publicaImagem(imagem):
     publicador.publish(imagem)
 
 if __name__ == "__main__":
-    endereco = "http://192.168.43.202:8080/shot.jpg"
+    #endereco = "http://192.168.43.1:8080/shot.jpg"
+    endereco = "http://192.168.43.55:8080/shot.jpg"
+    #Roteador endereco = "http://192.168.1.101:8080/shot.jpg"
     rospy.init_node('ip_camera', anonymous=True)
     rate = rospy.Rate(60)    
 

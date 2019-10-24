@@ -16,6 +16,10 @@
 #include "funcoesPosition.h"
 #include <geometry_msgs/Point.h>
 
+#include <sound_play/sound_play.h>
+#include <unistd.h>
+
+
 Estrategia::Estrategia(std::string nome, int frequencia) : no(nome), loop_rate(frequencia), tempoDelay(6000)
 {
 	for (int i = 0; i < 15; i++)
@@ -30,6 +34,17 @@ Estrategia::Estrategia(std::string nome, int frequencia) : no(nome), loop_rate(f
 
 	setTopicoExterno();
 	setTopicoInterno();
+	
+	this->posicaoInicio.yaw = -999999;
+
+	posicaoInicio.x = 0;
+	posicaoInicio.y = 0;
+	posicaoInicio.z = 0;
+
+	qrDetectado = false;
+	baseEncontrada = false;
+
+	tempo = ros::Time::now();
 }
 
 void Estrategia::fase2()
@@ -72,6 +87,65 @@ void Estrategia::fase2()
 	}
 }
 
+void Estrategia::fase4()
+{
+	leBase();
+
+	subir();
+
+	for(int i = 0; i<15; i++)
+	{
+		irPara(base[i]);
+		while (comparaPosicao(base[i], this->posicao, 0.5) == false)
+		{
+			atualizar();
+
+			if(qrDetectado == true)
+			{
+				parar();		
+				som.say("Code detected");
+
+				irPara(base[i]);
+			}
+		}
+		
+		
+
+		
+	}
+	
+}
+
+void Estrategia::ledVerde()
+{
+	std_msgs::String comando;
+
+	std::stringstream ss;
+
+	ss.str("ledVerde");
+
+	comando.data = ss.str();
+	enviaComando.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();	
+}
+
+void Estrategia::ledVermelho()
+{
+	std_msgs::String comando;
+
+	std::stringstream ss;
+
+	ss.str("ledVermelho");
+
+	comando.data = ss.str();
+	enviaComando.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();
+}
+
 void Estrategia::recebeFase(const std_msgs::Int8::ConstPtr& mensagem)
 {
 	fase = mensagem->data;
@@ -98,6 +172,9 @@ void Estrategia::pousar()
 void Estrategia::atualizar()
 {
 	baseEncontrada = false;
+	qrDetectado = true;
+	fase = -1;
+
 	ros::spinOnce();
 	this->loop_rate.sleep();
 
@@ -185,30 +262,58 @@ void Estrategia::loop()
 				fase2();
 			break;
 			case 3:
+				
 			break;
 			case 4:
+				fase4();
+			break;
+
+			case 101:
+				ROS_INFO("Testa Led");
+				ledVerde();
+				delay();
+				ledVermelho();
+			break;
+
+			case 102:
+				ROS_INFO("Testa Som");
+				som.say("Code detected");
 			break;
 		}
 
-		ros::spinOnce();
-		this->loop_rate.sleep();
+		atualizar();
 	}
 }
 
 void Estrategia::detectouQR(const std_msgs::String::ConstPtr& mensagem)
 {
-	if (mensagem->data.size() == 1)
+	qrLido = mensagem->data[5];
+	
+	ROS_INFO("Recebido QR Code: %c", qrLido);
+	qrDetectado = true;
+
+	if(ros::Time::now()-tempo > ros::Duration(2))
 	{
-		qrLido = mensagem->data[0];
+		som.say("Detected code");
+		tempo = ros::Time::now();
 	}
+	
 }
 
-void Estrategia::getPosicao(const ger_drone_cbr::Position& posicao)
+void Estrategia::getPosicao(const ger_drone_cbr::Position& posicaoRecebida)
 {
-	this->posicao.x = posicao.x;
-	this->posicao.y = posicao.y;
-	this->posicao.z = posicao.z;
-	this->posicao.yaw = posicao.yaw;
+	ger_drone_cbr::Position real;
+
+	real.x = posicaoRecebida.x + posicaoInicio.x;
+	real.y = posicaoRecebida.y + posicaoInicio.y;
+	real.z = posicaoRecebida.z + posicaoInicio.z;
+	real.yaw = posicaoRecebida.yaw + posicaoInicio.yaw;
+	
+
+	this->posicao.x = real.x;
+	this->posicao.y = real.y;
+	this->posicao.z = real.z;
+	this->posicao.yaw = real.yaw;
 }
 
 
@@ -312,19 +417,31 @@ void Estrategia::fase1()
 	ROS_INFO("Iniciando fase 1");
 	subir();
 
+	
+
 	geraTrajetoria();
 
+	delay();
+	atualizar();
+	delay();
+	atualizar();
+	/*posicaoInicio.x = -posicao.x;
+	posicaoInicio.y = -posicao.y;
+	posicaoInicio.z = -posicao.z;
+
+	posicaoInicio.yaw = -posicao.yaw;*/
 
 	int indiceBase = 0;
 	
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 17; i++)
 	{
 		irPara(trajetoria[i]);
 		ROS_INFO("Indo para %f %f %f", trajetoria[i].x, trajetoria[i].y, trajetoria[i].z);
 
-		while (comparaPosicao(trajetoria[i], this->posicao) == false)
+		while (comparaPosicao(trajetoria[i], this->posicao, 0.5) == false)
 		{
+			ROS_INFO("Local: %f %f %f | Distância: %f", posicao.x, posicao.y, posicao.z, distancia(this->posicao, trajetoria[i]));
 			if (baseEncontrada == true)
 			{
 				parar();
@@ -335,6 +452,9 @@ void Estrategia::fase1()
 				if (!jaVisitado(posicao) )
 				{
 					pousar();
+					
+					delay();
+					delay();
 
 					//while(voando == true)
 
@@ -394,16 +514,10 @@ void Estrategia::detectouBase(const geometry_msgs::Point baseDetectada)
 	baseEncontrada = true;
 	posicaoBase.x = baseDetectada.x;
 	posicaoBase.y = baseDetectada.y;
+	pousar();
 }
 
 void Estrategia::delay()
 {
 	std::this_thread::sleep_for(tempoDelay);
 }
-
-
-
-
-
-
-

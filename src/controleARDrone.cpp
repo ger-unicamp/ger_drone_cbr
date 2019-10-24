@@ -9,6 +9,7 @@
 #include "std_msgs/String.h"
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
+//#include "funcoesPosition.h"
 
 int main(int argc, char **argv)
 {
@@ -126,8 +127,28 @@ void ControleARDrone::mudaCamera(int camera)
 void ControleARDrone::setTopicoExterno()
 {
 	comandoDrone = no.advertise<std_msgs::String>("/tum_ardrone/com", 1000);
-
+	tumComand = no.subscribe("/tum_ardrone/com", 1000, &ControleARDrone::recebeEstado, this);
 	getPosicao = no.subscribe("/ardrone/predictedPose", 1000, &ControleARDrone::getLocalizacao, this);
+}
+
+void ControleARDrone::recebeEstado(const std_msgs::String mensagem)
+{
+	/*if(mensagem[2] != 'c')
+	{
+		return;
+	}
+
+	int indice = 0;
+
+	do
+	{
+		indice+=1;
+	}while(mensagem[indice] != 'E' && mensagem[indice+=1] != 'r');
+
+	ger_drone_cbr::Position erro;
+
+	//string x[3]
+	//erro.x =*/ 
 }
 
 void ControleARDrone::loop()
@@ -136,9 +157,16 @@ void ControleARDrone::loop()
 	while (ros::ok())
 	{
 		
+
+		terminou();
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
+}
+
+void ControleARDrone::terminou()
+{
+
 }
 
 void ControleARDrone::setTopicoInterno()
@@ -204,6 +232,9 @@ void ControleARDrone::para()
 	std_msgs::String comando;
 	comando.data = ss.str();
 	comandoDrone.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();	
 }
 
 void ControleARDrone::pousa()
@@ -216,16 +247,14 @@ void ControleARDrone::pousa()
 	std_msgs::String comando;
 	comando.data = ss.str();
 	comandoDrone.publish(comando);
+
+	ros::spinOnce();
+	loop_rate.sleep();
 }
 
 void ControleARDrone::getLocalizacao(const tum_ardrone::filter_state& posicao)
 {
 	ger_drone_cbr::Position posicaoConvertida;
-	
-	posicaoConvertida.x = 0;
-	posicaoConvertida.y = 0;
-	posicaoConvertida.yaw = 0;
-	posicaoConvertida.z = 0;
 
 	posicaoConvertida.x = posicao.x;
 	posicaoConvertida.y = posicao.y;

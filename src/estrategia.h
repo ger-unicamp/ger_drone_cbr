@@ -10,6 +10,10 @@
 #include "ger_drone_cbr/Position.h"
 #include <geometry_msgs/Point.h>
 
+#include <sound_play/sound_play.h>
+#include <unistd.h>
+
+
 class Estrategia
 {
 	public:
@@ -69,6 +73,7 @@ class Estrategia
 		ros::Subscriber iniciarFase; ///<value> Recebe o comando para iniciar a programação de alguma fase <para> Tópico: "/iniciarFase" </para> </value>
 		ros::Subscriber interface; ///<value> Recebe o comando da interface </value>
 		ros::Subscriber objeto; ///<value> Recebe o objeto identificado pela câmera </value>
+		ros::Subscriber terminou;
 
 		ros::Publisher enviaComando; ///<value> Envia um comando para o drone <para> Tópico: "/comando" </para> </value>
 		ros::Publisher destino; ///<value> Define o destino do drone <para> Tópico: "/destino" </value>
@@ -80,13 +85,18 @@ class Estrategia
 		ger_drone_cbr::Position base[15]; ///<value> Posições das bases (exceto costeira) </value>
 		ger_drone_cbr::Position baseCosteira; ///<value> Posição da base costeira </value>
 		ger_drone_cbr::Position posicaoBase;
+		ger_drone_cbr::Position posicaoInicio;
+
+		ros::Time tempo;
+
+		sound_play::SoundClient som;
 
 		bool visitado[15]; ///<value> Registra se alguma base já foi visitada nessa fase </value>
 		int fase; ///<value> Armazena a fase atual </value> 
 
 		char qrLido; ///<value> Caractér do QR code lido </value>
 		bool baseEncontrada; ///<value> Se existe base no campo de visão do drone </value>
-
+		bool qrDetectado;
 		///<summary> Se inscreve nos tópicos internos (dos nós do pacote) </summary>
 		void setTopicoInterno();
 
@@ -120,9 +130,17 @@ class Estrategia
 		///<summary> Realiza a fase 2 </summary>
 		void fase2();
 
-		
+		///<summary> Realiza a fase 3 </summary>
+		void fase4();
+
 		ger_drone_cbr::Position* geraTrajetoria();
 
 		///<summary> Recebe a base detectada </summary>
 		void detectouBase(const geometry_msgs::Point baseDetectada);
+
+		///<summary> Envia pedido para piscar led vermelho </summary>
+		void ledVermelho();
+
+		///<summary> Envia pedido para piscar led verde </summary>
+		void ledVerde();
 };

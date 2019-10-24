@@ -1,4 +1,5 @@
 #include <math.h>
+#include "ros/ros.h"
 
 #include "ger_drone_cbr/Position.h"
 
@@ -18,6 +19,7 @@ bool comparaPosicao(ger_drone_cbr::Position a, ger_drone_cbr::Position b)
 
 bool comparaPosicao(ger_drone_cbr::Position a, ger_drone_cbr::Position b, float proximidade)
 {
+	//ROS_INFO("Distância> %f", distancia(a,b));
 	if (distancia(a,b)>proximidade)
 	{
 		return false;
